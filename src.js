@@ -1,13 +1,18 @@
 const express = require('express'); // Access to the express objects.
-const app     = express();          // app is used to access HTTP methods.
+const app = express(); // app is used to access HTTP methods.
 
-app.use(express.json());            // JSON parser middleware.
+app.use(express.json()); // JSON parser middleware.
 
-const path    = require('path');    // A NodeJS module used to create paths.
+const serve_directory = __dirname + '/subdirectory';
+app.use(express.static(serve_directory)); // Serve static files from subdirectory.
+
+const path = require('path'); // A NodeJS module used to create paths.
 
 /* Handling the root directory GET request */
 app.get('/', (request, response) => {
-  response.send("Hello World!");
+  const file_path = path.join(__dirname, '/subdirectory/resource_with_js.html');
+
+  response.sendFile(file_path);
 });
 
 /* Handling the request for a resource in a subdirectory */
@@ -18,6 +23,28 @@ app.get('/subdirectory/html_resource.html', (request, response) => {
 
   // Then we send the file to the user.
   response.sendFile(file_path);
+});
+
+/* Handling server requests from browser */
+app.get('/server_request', (request, response) => {
+  const res = {
+    text: "Response for the GET request!"
+  };
+
+  response.json(res); // Client is anticipating a JSON object.
+});
+
+app.post('/server_request', (request, response) => {
+  /* Client data is a JSON object with name and age */
+  const client_data = request.body;
+
+  console.log('received data!');
+  console.log('name: ', client_data.name);
+  console.log('age: ', client_data.age);
+
+  /* Client is not requesting any data sent back */
+  /* But we will send back a 200 OK */
+  response.sendStatus(200);
 });
 
 const port = 9999;
